@@ -70,10 +70,6 @@ takeEl n (_:xs) = takeEl (n-1) xs
 
 _mapComp f xs = [ f x | x <- xs] 
 
-quickSortParam :: (Ord a) => [a] -> [a]
-quickSortParam [] = []
-quickSortParam (x:xs) = quickSortParam [y | y <- xs , y < x] ++ (x : quickSortParam [y | y <- xs , y > x])
-
 --reverse inefficiente
 _reverse [] = []
 _reverse (x:xs) = _reverse(xs) ++ [x]
@@ -235,3 +231,108 @@ _filter2 (Just x : xs) = x : _filter2 xs
 
 matriceMaxMin [] = []
 matriceMaxMin xs = _filter2 (map coppiaMaxMin xs)
+
+
+
+-------------------------------------------------------
+--------------  Esercizi Numeri Liste -----------------
+-------------------------------------------------------
+
+binomial n k = (fact n) `div` ( (fact k) * (fact (n - k) ) )
+
+--Scrivere una funzione che data una lista ne costruisce una rimuovendo gli elementi di posizione pari (si conti partendo da 1).
+
+removePariAux [] acc = []
+removePariAux (x:xs) acc | (acc + 1) `mod` 2 == 0 = removePariAux xs (acc+1)
+                         | (acc + 1) `mod` 2 /= 0 = x : removePariAux xs (acc+1)
+
+removePari xs = removePariAux xs 0
+
+--2. Scrivere una funzione che calcola la somma degli elementi di posizione dispari di una lista.
+
+sommaPosizioniDispari xs = foldl (+) 0 xs 
+
+--3. Scrivere il QuickSort (polimorfo).
+quickSortParam :: (Ord a) => [a] -> [a]
+quickSortParam [] = []
+quickSortParam (x:xs) = quickSortParam [y | y <- xs , y < x] ++ (x : quickSortParam [y | y <- xs , y > x])
+
+
+--4. Scrivere una funzione che calcola i 2 minori elementi dispari di una lista (se esistono). Ad esempio minOdd([2,3,4,6,8,7,5]) riduce a (3,5)
+
+coppiaMinimo [] = Nothing
+coppiaMinimo (x:xs) | length xs == 0 = Nothing
+                    | True = Just (min1, min2) where
+                              min1 = minimoList xs x
+                              min2 = minimoList (removeList xs (minimoList xs x)) x
+
+removeList [] _ = []
+removeList (x:xs) n | x == n = removeList xs n
+                    | True = x : (removeList xs n)
+
+
+{-
+5. Scrivere una funzione che costruisce, a partire da una lista di numeri interi, una lista di coppie in cui
+(a) il primo elemento di ogni coppia `e uguale all’elemento di corrispondente posizione nella lista originale e
+(b) il secondo elemento di ogni coppia `e uguale alla somma di tutti gli elementi conseguenti della lista originale.
+-}
+
+sommaSeguenti [] = []
+sommaSeguenti (x:xs) = (x, (foldl (+) 0 xs)) : (sommaSeguenti xs)
+
+
+--6. Somma precedenti in coppia
+sommaPrecedentiAux [] acc = []
+sommaPrecedentiAux (x:xs) acc = (x, acc) : sommaPrecedentiAux xs (acc + x)
+
+sommaPrecedenti [] = []
+sommaPrecedenti xs = sommaPrecedentiAux xs 0
+
+{-
+7. Si scriva una funzione Haskell shiftToZero che data una lista costruisce un nuova lista che contiene
+gli elementi diminuiti del valore minimo.
+-}
+
+shiftToZero [] = []
+shiftToZero xs = map (\x -> x - (minimum xs)) xs
+
+-------------------------------------------------------
+----------------  Esercizi Matrici  -------------------
+-------------------------------------------------------
+
+{-
+1. Si scriva una funzione matrix_dim che data una matrice ne calcola le dimensioni, se la matrice `e
+ben formata, altrimenti restituisce (-1,-1).
+-}
+
+matrixDim [] = (0, 0)
+matrixDim (x:xs) | (checkBenFormata (length x) xs) == True = dimMatriceOk (x:xs)
+                 | True = (-1, -1)
+
+checkBenFormata n [] = True
+checkBenFormata n (x:xs) | (length x) == n = checkBenFormata n xs 
+                         | True = False
+
+countCols :: (Eq a, Num a) => [[a]] -> a
+countCols [] = 0
+countCols (x:xs) = 1 + countCols xs
+
+dimMatriceOk (x:xs) = ((length x), (countCols (x:xs)))
+
+-- 2. Si scriva una funzione colsums che data una matrice calcola il vettore delle somme delle colonne.
+sommaColonne :: (Eq a, Num a) => [[a]] -> [a]
+sommaColonne ([]:_) = []
+sommaColonne xs = foldl (+) 0 (map head xs) : sommaColonne ( map tail xs)
+
+-- 3.Si scriva una funzione colaltsums che, data una matrice implementata come liste
+--   di liste perrighe, calcola il vettore delle somme a segni alternati delle colonne della matrice
+
+alternaSegniMatrice [] = []
+alternaSegniMatrice xs = alternaSegniMatriceAux xs 0
+
+alternaSegniMatriceAux [] i = []
+alternaSegniMatriceAux (x:xs) i = (alternaSegniRiga x i 0) : alternaSegniMatriceAux (x:xs) (i+1)
+
+alternaSegniRiga [] i j = []
+alternaSegniRiga (x:xs) i j | ((i+j) `mod` 2) == 0 = x : alternaSegniRiga xs i (j+1)
+                            | True = -x : alternaSegniRiga xs i (j+1)
