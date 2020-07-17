@@ -99,3 +99,87 @@ height = \t -> case t of
                 Branch t1 t2 -> max (1 + (height t1)) (1 + (height t2))
 
 treeProva = Branch (Branch (Branch (Leaf 5) (Leaf 6)) (Leaf 6)) (Leaf 6)
+
+
+--sommaPari pattern matching
+
+--sommaPari ricorsione di coda
+sommaPariAux acc []  = acc
+sommaPariAux acc (x:xs) | x `mod` 2 == 0 = sommaPariAux (acc+x) xs 
+                        | True = sommaPariAux acc xs 
+                      
+sommaPari = sommaPariAux 0
+
+--sommaPari foldl foldr
+sommaPariFoldl xs = foldl (+) 0 [x | x <- xs , x `mod` 2 == 0]
+sommaPariFoldr xs = foldr (+) 0 [x | x <- xs , x `mod` 2 == 0]
+sommaPariFoldl2 xs = foldl (\ n m -> if m `mod` 2 == 0 then n+m else n) 0 xs
+sommaPariFoldr2 xs = foldr (\ m n -> if m `mod` 2 == 0 then n+m else n) 0 xs
+
+--alberi binari
+data BTree a = Null | BTree a (BTree a) (BTree a)
+
+btreeProva = BTree 0 (BTree 5 (BTree 7 Null Null)(BTree 8 Null Null)) (BTree 5 Null (BTree 5 Null Null))
+
+--profondità albero binario
+depthBtree Null = 0
+depthBtree (BTree n tl tr) = 1 + (max (depthBtree tl) (depthBtree tr))
+--somma albero binario
+sommaBtree Null = 0
+sommaBtree (BTree n tl tr) = sommaBtree tl + sommaBtree tr + n
+
+
+-------------------------------------------------------
+-----------------  Esercizi Esami   -------------------
+-------------------------------------------------------
+
+ ---Scrivere una funzione Haskell che controlli se due liste sono l’una una 
+ -- permutazione dell’altra. L’unica operazione permessa sugli elementi della 
+ -- lista `e il test di uguaglianza. Si definisca inoltre il tipo Haskell 
+ -- della funzione definita e delle funzioni ausiliarie.
+
+checkPermutation [][] = True
+checkPermutation _ [] = False
+checkPermutation [] _ = False
+checkPermutation (x:xs) ys = case (remove x ys) of
+                              Nothing -> False
+                              Just yss -> checkPermutation xs yss
+remove x [] = Nothing
+remove x (y:ys) | x == y = Just ys
+                | True = concMaybe y (remove x ys)
+
+concMaybe y Nothing = Nothing
+concMaybe y (Just ys) = Just (y : ys)  
+
+
+-- Occorrenze in albero binario
+occorrenze x Null = 0
+occorrenze x (BTree y tl tr) = (if x == y then 1 else 0) + occorrenze x tl + occorrenze x tr
+
+{- 
+Il grafo di una funzione parziale f : A → B `e definito come l’insieme di coppie 
+{(a, b) | b = f(a)}, ossia l’insieme di coppie in cui i primi elementi costituiscono 
+il dominio della funzione e i secondi elementi definiscono il comportamento della 
+funzione, sui corrispondenti primi elementi.
+Scrivere una funzione Haskell che preso il grafo di una funzione f da A in B, 
+rappresentato come lista di coppie, ed una lista l di elementi di tipo A, 
+applica la funzione f a tutti gli elementi della lista.
+Si tenga presente che la funzione f pu`o essere parziale (non definita su alcuni elementi), 
+nel caso la lista l contenga un elemento su cui f non `e definita, l’elemento viene rimosso dalla lista.
+Scrivere inoltre una funzione Haskell che, dato un lista di coppie, controlli che la lista non contenga due coppie con il primo elemento uguale.
+-}
+
+--partialFunction :: (Num a, Eq a) => [(a , a)] -> a -> Maybe a
+partialFunction [] x = Nothing
+partialFunction ((v,r):fl) x | v==x = Just r 
+                             | True = partialFunction fl x
+
+funzione = [(1,2), (3,4), (5,6)]
+
+partialFunctionListAux fl li = map (partialFunction fl) li
+
+_filter [] = []
+_filter (Nothing : xs) = _filter xs
+_filter (Just x : xs) = x : _filter xs 
+
+partialFunctionList fl l = _filter (partialFunctionListAux fl l)
