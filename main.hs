@@ -85,5 +85,17 @@ reverseAcc (x:xs) ys = reverseAcc xs (x:ys)
 
 _reverse2 xs = reverseAcc xs []
 
---reverse foldr
+--reverse foldl
+reverseFoldl xs = foldl (\ xs x -> x:xs ) [] xs
 
+--reverse foldr
+reverseFoldr xs = foldr (\y ys -> (ys ++ [y])) [] xs
+
+data Tree a = Leaf a | Branch (Tree a) (Tree a)
+
+height :: Tree a -> Integer
+height = \t -> case t of
+                Leaf n -> 0
+                Branch t1 t2 -> max (1 + (height t1)) (1 + (height t2))
+
+treeProva = Branch (Branch (Branch (Leaf 5) (Leaf 6)) (Leaf 6)) (Leaf 6)
