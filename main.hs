@@ -183,3 +183,55 @@ _filter (Nothing : xs) = _filter xs
 _filter (Just x : xs) = x : _filter xs 
 
 partialFunctionList fl l = _filter (partialFunctionListAux fl l)
+
+
+
+{----------------------------------
+      Elmininazione prima riga e prima colonna da matrice 
+      quadrata rappresentata come lista di liste
+-----------------------------------}
+
+eliminaRigaColonna [] = []
+eliminaRigaColonna (x:xs) = eliminaColonna xs
+
+eliminaColonna [] = []
+eliminaColonna (x:xs) = (tail x) : (eliminaColonna xs)
+
+matriceProva = [[1, 2, 3], [4, 5, 6], [7, 8, 9]]
+
+diagonaleMatrice [] = []
+diagonaleMatrice (x:xs) = (head x) : diagonaleMatrice (eliminaRigaColonna (x:xs))
+
+
+{----------------------------------
+        Trasposta matrice
+-----------------------------------}
+
+trasposta ([]:_) = []
+trasposta xs = map head xs : trasposta ( map tail xs )
+
+
+{----------------------------------
+  Coppia massimo minimo in lista
+-----------------------------------}
+coppiaMaxMin :: (Num a, Ord a) => [a] -> Maybe (a, a)
+coppiaMaxMin [] = Nothing
+coppiaMaxMin (x:xs) = Just (_max, _min) where
+                  _max = massimoList xs x
+                  _min = minimoList xs x
+
+massimoList [] temp = temp
+massimoList (x:xs) temp | x >= temp = massimoList xs x
+                        | x < temp = massimoList xs temp
+minimoList [] temp = temp
+minimoList (x:xs) temp | x >= temp = minimoList xs temp
+                       | x < temp = minimoList xs x
+
+testList = [1,3..21] ++ [20,19..0]
+
+_filter2 [] = []
+_filter2 (Nothing : xs) = _filter2 xs
+_filter2 (Just x : xs) = x : _filter2 xs 
+
+matriceMaxMin [] = []
+matriceMaxMin xs = _filter2 (map coppiaMaxMin xs)
