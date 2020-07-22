@@ -387,7 +387,7 @@ checkRaggioMatrice xs raggio = checkRaggioMatriceAux xs raggio 0
 
 -------Versione foldl map
 checkRaggioMatriceFoldl :: [[Integer]] -> Integer -> Bool
-checkRaggioMatriceFoldl xs raggio = foldl (&&) True (map (\x -> checkRaggioRiga (fst x) raggio (snd x)  ) (zip xs [0..((length xs)-1)]) )
+checkRaggioMatriceFoldl xs raggio = foldl (&&) True (map (\x -> checkRaggioRiga (fst x) raggio (snd x) ) (zip xs [0..((length xs)-1)]) )
 
 
 {-
@@ -396,8 +396,89 @@ prodotto corrispondente (di dimensioni n × m). Si assuma di moltiplicare matric
 compatibili e (se facesse comodo) matrici non degeneri.
 -}
 
-product mx1 mx2 = map (\riga -> map (sommaProdottoLista riga) (trasposta mx2) ) mx1
+prodottoMatrici mx1 mx2 = map (\riga -> map (sommaProdottoLista riga) (trasposta mx2) ) mx1
                             where 
                                 sommaProdottoLista _  [] = 0
                                 sommaProdottoLista [] _  = 0
                                 sommaProdottoLista (x:xs) (y:ys) = (x*y) + (sommaProdottoLista xs ys)
+
+
+-------------------------------------------------------
+------------------  Esercizi BST ----------------------
+-------------------------------------------------------
+
+data BST a = Void | Node {val :: a, l :: BST a , r :: BST a}
+ deriving (Eq, Ord, Read, Show)
+
+-- Esercizio 1 : somma i valori di un albero
+sumBST :: (Ord a, Num a) => BST a -> a
+sumBST Void = 0
+sumBST (Node val l r) = val + (sumBST l) + (sumBST r)
+
+-- Esercizio 3 valuta se le somme di tutti gli alberi di una lista sono uguali
+checkSommaAlberi ::(Ord a, Num a) => [BST a] -> Bool
+checkSommaAlberi []     = True
+checkSommaAlberi (albero:alberi) = all (== (sumBST albero)) (map (\x -> sumBST x) alberi)
+
+-- Esercizio 5 inserimento in BST
+insertBST :: Ord a => BST a -> a -> BST a
+insertBST Void x = Node x Void Void
+insertBST (Node val l r) x | x == val = Node val l r
+                           | x < val = Node val (insertBST l x) r
+                           | True = Node val l (insertBST r x)
+
+createBSTaux bst [] = bst
+createBSTaux bst (x:xs) = createBSTaux (insertBST bst x) xs
+
+createBST xs = createBSTaux Void xs
+
+-- Esercizio 6. Si scriva una funzione bst2List che calcola la lista ordinata degli elementi di un BST.
+
+inorder Void = []
+inorder (Node val l r) = (inorder l) ++ [val] ++ (inorder r)
+
+-- Esercizio 7. Si scriva una (semplice) funzione di ordinamento di liste come combinazione di funzioni fatte nei precedenti esercizi.
+
+ordinaConBST xs = inorder (createBST xs)
+
+-- Esercizio 8. Si scriva una funzione filtertree p t che costruisce una lista (ordinata) di tutti gli elementi dell'albero t che soddisfano il predicato p.
+filtertree :: Ord a => (a -> Bool) -> BST a -> [a]
+filtertree _ Void = []
+filtertree p (Node val l r) = (filtertree p l) ++ filtredElement ++ (filtertree p r) 
+                                  where 
+                                    filtredElement | p val == True = [val]
+                                                   | True = []
+
+-- Esercizio 13 
+-- Si scriva una funzione che dato un BST ne restituisce la lista degli elementi ottenuti visitando l’albero a livelli.
+visitaPerLivelli :: Ord a => BST a -> [[a]]
+visitaPerLivelli Void         = []
+visitaPerLivelli (Node val l r) = (val:[]) : ( merge visit_l visit_r )
+                                    where
+                                        visit_l = visitaPerLivelli l
+                                        visit_r = visitaPerLivelli r
+merge :: [[a]] -> [[a]] -> [[a]]
+merge []     ys     = ys
+merge xs     []     = xs
+merge (x:xs) (y:ys) = (x ++ y) : merge xs ys
+
+{- foldr liste
+foldr f z [] = z
+foldr f z (x:xs) = f x (foldr f z xs)
+-} 
+
+fold :: (Ord a) => (a -> b -> b -> b) -> b -> BST a -> b
+fold _ z Void = z
+fold f z ( Node val l r) = f val ( fold f z l) ( fold f z r)
+
+-- Esercizio 14 calcolare l'altezza di un albero con fold
+treeheight :: Ord a => BST a -> Int
+treeheight = fold (\ _ h_l h_r -> 1 + (max h_l h_r) ) (-1)
+
+tree = Node {val=8, l=Node {val=2, l=Void, r=Node {val=5, l=Void, r=Void}}, r=Node {val=10, l=Void, r=Void}}
+
+tree2 = Node {val=8, l=Node {val=2, l=Void, r=Node {val=5, l=Void, r=Void}}, r=Node {val=50, l=Void, r=Void}}
+
+
+
+data Tree a = Void | Node a [Tree a] deriving (Eq,Show)
