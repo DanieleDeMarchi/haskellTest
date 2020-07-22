@@ -331,8 +331,73 @@ alternaSegniMatrice [] = []
 alternaSegniMatrice xs = alternaSegniMatriceAux xs 0
 
 alternaSegniMatriceAux [] i = []
-alternaSegniMatriceAux (x:xs) i = (alternaSegniRiga x i 0) : alternaSegniMatriceAux (x:xs) (i+1)
+alternaSegniMatriceAux (x:xs) i = (alternaSegniRiga x i 0) : alternaSegniMatriceAux xs (i+1)
 
 alternaSegniRiga [] i j = []
 alternaSegniRiga (x:xs) i j | ((i+j) `mod` 2) == 0 = x : alternaSegniRiga xs i (j+1)
                             | True = -x : alternaSegniRiga xs i (j+1)
+
+sommaColonneSegniAlternati xs = sommaColonne (alternaSegniMatrice xs)
+
+{-
+4. Si scriva una funzione colMinMax che, data una matrice implementata come liste di liste per righe,
+calcola il vettore delle coppie (minimo,massimo) delle colonne della matrice.
+-}
+
+--VEDI ESERCIZI ESAMI
+
+--5. Matrice triangolare inferiore
+checkTriangolareInferioreAux [] i = True
+checkTriangolareInferioreAux (x:xs) i = if (checkZeroAfter x i 0) == True 
+                                          then checkTriangolareInferioreAux xs (i+1)
+                                          else False
+
+checkZeroAfter [] i acc = True
+checkZeroAfter (x:xs) i acc | acc <= i = checkZeroAfter xs i (acc+1)
+                            | True = if x == 0 then checkZeroAfter xs i (acc+1)
+                                               else False
+
+checkTriangolareInferiore xs = checkTriangolareInferioreAux xs 1
+
+triangolareInferiore = [[5,0,0,0],[1,4,0,0],[5,8,2,0],[4,1,9,3]]
+
+--6. Matrice triangolare superiore
+checkTriangolareSuperiore xs = checkTriangolareInferioreAux (trasposta xs) 1
+
+--7. Si scriva un predicato diagonal che determina se una matrice (quadrata) `e diagonale
+-- basta fare && tra lowerTriangular e upperTriangular
+
+{-
+8. Una matrice quadrata M di ordine n si dice convergente con raggio r se il modulo della somma
+degli elementi di ogni riga, escluso quello sulla diagonale, `e inferiore a r.
+Si scriva un predicato convergent m r che determina se una matrice (quadrata) m `e convergente
+con raggio r
+-}
+
+sumRowExclude [] partialSum i escludi = partialSum
+sumRowExclude (x:xs) partialSum i escludi | i == escludi = sumRowExclude xs partialSum (i+1) escludi
+                                          | True = sumRowExclude xs (abs x+partialSum) (i+1) escludi
+
+checkRaggioRiga xs raggio escludi = raggio > (sumRowExclude xs 0 0 escludi)
+
+checkRaggioMatriceAux [] raggio riga = True
+checkRaggioMatriceAux (x:xs) raggio riga = (checkRaggioRiga x raggio riga) && (checkRaggioMatriceAux xs raggio (riga+1))
+
+checkRaggioMatrice xs raggio = checkRaggioMatriceAux xs raggio 0
+
+-------Versione foldl map
+checkRaggioMatriceFoldl :: [[Integer]] -> Integer -> Bool
+checkRaggioMatriceFoldl xs raggio = foldl (&&) True (map (\x -> checkRaggioRiga (fst x) raggio (snd x)  ) (zip xs [0..((length xs)-1)]) )
+
+
+{-
+11. Si scriva una funzione che data una matrice di dimensioni n×k ed una k ×m restituisca la matrice
+prodotto corrispondente (di dimensioni n × m). Si assuma di moltiplicare matrici con dimensioni
+compatibili e (se facesse comodo) matrici non degeneri.
+-}
+
+product mx1 mx2 = map (\riga -> map (sommaProdottoLista riga) (trasposta mx2) ) mx1
+                            where 
+                                sommaProdottoLista _  [] = 0
+                                sommaProdottoLista [] _  = 0
+                                sommaProdottoLista (x:xs) (y:ys) = (x*y) + (sommaProdottoLista xs ys)
