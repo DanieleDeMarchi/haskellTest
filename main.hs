@@ -449,6 +449,29 @@ filtertree p (Node val l r) = (filtertree p l) ++ filtredElement ++ (filtertree 
                                     filtredElement | p val == True = [val]
                                                    | True = []
 
+-- Esercizio 9 
+{- Si scriva una funzione annotate che costruisca un nuovo BST che in ogni nodo contenga, al posto del valore originale, 
+una coppia composta dal medesimo valore e dall’altezza del nodo stesso (la lunghezza del massimo cammino, cioè 1 + max(height(sx),height(dx))
+-}
+
+annotate :: Ord a => BST a -> BST (a,Int)
+annotate Void = Void
+annotate bst = case bst of
+                        Node x Void Void -> Node (x,0) Void Void
+                        Node x l    Void -> Node (x, 1 + (treeheight l)) (annotate l) Void
+                        Node x Void r -> Node (x, 1 + (treeheight r)) Void (annotate r)
+                        Node x l    r -> Node (x, 1 + (max (treeheight l) (treeheight r)) ) (annotate l) (annotate r)
+
+
+{- 10. Si scriva un predicato (funzione a valori booleani) almostBalanced per determinare se un albero
+binario ha la seguente proprietà: per ogni nodo le altezze dei figli destro e sinistro differiscono al
+massimo di 1.
+-}
+
+almostBalanced :: Ord a => BST a -> Bool
+almostBalanced Void = True
+almostBalanced bst = 
+
 -- Esercizio 13 
 -- Si scriva una funzione che dato un BST ne restituisce la lista degli elementi ottenuti visitando l’albero a livelli.
 visitaPerLivelli :: Ord a => BST a -> [[a]]
@@ -481,4 +504,36 @@ tree2 = Node {val=8, l=Node {val=2, l=Void, r=Node {val=5, l=Void, r=Void}}, r=N
 
 
 
-data Tree a = Void | Node a [Tree a] deriving (Eq,Show)
+
+
+-------------------------------------------------------
+-----------------  Esercizi Tree ----------------------
+-------------------------------------------------------
+
+data GenericTree a = VoidT | NodeT a [ GenericTree a] deriving (Eq , Show )
+
+-- Esercizio 1. Si scriva una generalizzazione della funzione foldr delle liste per Alberi Generici
+treefold :: (a->[b]->b) -> b -> GenericTree a -> b
+treefold _ z VoidT = z
+treefold f z (NodeT x branches) = f x (map (treefold f z) branches)
+
+-- Esercizio 2. Si scriva una funzione height per calcolare l’altezza di un albero usando opportunamente la treefold 
+treeHeight :: GenericTree a -> Int
+treeHeight = treefold (\_ heights -> 1 + foldr max (-1) heights ) (-1)
+
+-- Esercizio 7 Si scriva una funzione degree che restituisce il grado di un albero (il massimo del numero di ﬁgli per ogni nodo)
+
+countSons :: GenericTree a -> Int
+countSons VoidT = 0
+countSons (NodeT a []) = 0
+countSons (NodeT a (x:xs)) = 1 + countSons (NodeT a xs)
+
+degree :: GenericTree a -> Int
+degree (NodeT a xs) = degreeAux (NodeT a xs) where 
+                degreeAux VoidT = 0
+                degreeAux (NodeT a []) = 0 
+                degreeAux (NodeT a (x:xs)) = max (max (countSons x) (degreeAux x)) (countSons (NodeT a xs))
+
+
+_TREE_A :: GenericTree Int
+_TREE_A = NodeT 10 [VoidT, VoidT , NodeT 5 [VoidT, VoidT] , NodeT 9 [ NodeT 23 [VoidT] ]]
