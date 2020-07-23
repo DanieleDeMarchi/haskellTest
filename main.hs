@@ -344,7 +344,8 @@ sommaColonneSegniAlternati xs = sommaColonne (alternaSegniMatrice xs)
 calcola il vettore delle coppie (minimo,massimo) delle colonne della matrice.
 -}
 
---VEDI ESERCIZI ESAMI
+maxMinRow [] = []
+maxMinRow xs = map (\x -> (minimum x, maximum x)) xs
 
 --5. Matrice triangolare inferiore
 checkTriangolareInferioreAux [] i = True
@@ -470,7 +471,8 @@ massimo di 1.
 
 almostBalanced :: Ord a => BST a -> Bool
 almostBalanced Void = True
-almostBalanced bst = 
+almostBalanced (Node val l r) | (abs ((treeheight l) - (treeheight l)) ) > 1 = False
+                              | True = ((almostBalanced l) && (almostBalanced r))
 
 -- Esercizio 13 
 -- Si scriva una funzione che dato un BST ne restituisce la lista degli elementi ottenuti visitando l’albero a livelli.
@@ -537,3 +539,35 @@ degree (NodeT a xs) = degreeAux (NodeT a xs) where
 
 _TREE_A :: GenericTree Int
 _TREE_A = NodeT 10 [VoidT, VoidT , NodeT 5 [VoidT, VoidT] , NodeT 9 [ NodeT 23 [VoidT] ]]
+
+
+
+{- 
+Il grafo di una funzione parziale f : A → B `e definito come l’insieme di coppie 
+{(a, b) | b = f(a)}, ossia l’insieme di coppie in cui i primi elementi costituiscono 
+il dominio della funzione e i secondi elementi definiscono il comportamento della 
+funzione, sui corrispondenti primi elementi.
+Scrivere una funzione Haskell che preso il grafo di una funzione f da A in B, 
+rappresentato come lista di coppie, ed una lista l di elementi di tipo A, 
+applica la funzione f a tutti gli elementi della lista.
+Si tenga presente che la funzione f pu`o essere parziale (non definita su alcuni elementi), 
+nel caso la lista l contenga un elemento su cui f non `e definita, l’elemento viene rimosso dalla lista.
+Scrivere inoltre una funzione Haskell che, dato un lista di coppie, controlli che la lista non contenga due coppie con il primo elemento uguale.
+-}
+
+
+{-
+funzioneParziale f [] = []
+funzioneParziale f xs = map (\x -> applicaF x f) xs
+
+applicaF [] x = Nothing
+applicaF ((v:r):xs) x | v == x = Just r
+                      | True = applicaF xs x
+
+filterMaybe [] = []
+filterMaybe (x:xs) | x == Nothing = filterMaybe xs
+                   | True = x : filterMaybe xs  
+
+maxMinRow [] = []
+maxMinRow xs = map (\x -> (minimum x, maximum x)) xs
+-}
